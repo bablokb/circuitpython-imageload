@@ -19,16 +19,15 @@ into a palette from an indexed BMP file.
 import sys
 import displayio
 
-# try:
-#     from bitmaptools import readinto as _bitmap_readinto
-# except ImportError:
-#     _bitmap_readinto = None
+try:
+    from bitmaptools import readinto as _bitmap_readinto
+except ImportError:
+    _bitmap_readinto = None
 
-_bitmap_readinto = None
+from imageload import ResponseReader
 
 def load(
   file,
-  _offset,
   width: int,
   height: int,
   data_start: int,
@@ -46,15 +45,17 @@ def load(
   :param int colors: Number of distinct colors in the image
   :param int color_depth: Number of bits used to store a value
   :param int compression: 0 - none, 1 - 8bit RLE, 2 - 4bit RLE
+  :param bitmap_obj: used if not None. Must be of the correct size/type.
   """
-  print(f"{_offset=:#0x} ({_offset})")
+
+  # A ResponseReader is not an native object, so bitmaptools will fail
+  if isinstance(file,ResponseReader):
+    _bitmap_readinto = None
+
   palette_obj = displayio.Palette(colors)
-  #file.seek(data_start - colors * 4)
-  file.read(data_start - colors * 4 - (_offset))
-  _offset = data_start - colors * 4
+  file.seek(data_start - colors * 4)
   for value in range(colors):
     c_bytes = file.read(4)
-    _offset += 4
     # Need to swap red & blue bytes (bytes 0 and 2)
     palette_obj[value] = bytes(
       b"".join([c_bytes[2:3], c_bytes[1:2], c_bytes[0:1], c_bytes[3:1]])
@@ -70,12 +71,11 @@ def load(
     # convert unsigned int to signed int when height is negative
     height = negative_height_check(height)
 
+  # create Bitmap object unless it is provided
   if not bitmap_obj:
     bitmap_obj = displayio.Bitmap(width, abs(height), colors)
-  print(f"{_offset=:#0x} ({_offset})")
-  print(f"{data_start=:#0x} ({data_start})")
-  #file.read(data_start-(_offset))   # file.seek(data_start)
-  _offset = data_start
+
+  file.seek(data_start)
   line_size = width // (8 // color_depth)
   if width % (8 // color_depth) != 0:
     line_size += 1

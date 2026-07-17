@@ -27,21 +27,14 @@ def load(file, bitmap_obj):
   :param bitmap_obj: used if not None. Must be of the correct size/type.
   """
 
-  # the caller has already read 3 bytes (header)
-  offset = 0x02
-  file.read(10-(offset+1))   # file.seek(10)
-  offset = 0x0A
+  file.seek(10)
   data_start = int.from_bytes(file.read(4), "little")
   print(f"{data_start=}")
-  offset = 0x0E
-  #file.seek(14)        # redundant
+  file.seek(14)
   bmp_header_length = int.from_bytes(file.read(4), "little")
-  offset = 0x12
   print(f"{bmp_header_length=}")
-  #file.read(0x12-(offset+1)) # file.seek(0x12)
-  # Width of the bitmap in pixels
+  file.seek(0x12)  # Width of the bitmap in pixels
   _width = int.from_bytes(file.read(4), "little")
-  offset = 0x16
   try:
     _height = int.from_bytes(file.read(4), "little")
   except OverflowError as error:
@@ -49,32 +42,25 @@ def load(file, bitmap_obj):
       "Negative height BMP files are not supported on builds without longint"
       ) from error
   print(f"dimensions={_width}x{_height}")
-  offset = 0x1A
-  file.read(2)        # file.seek(0x1C)  # Number of bits per pixel
+  file.seek(0x1C)  # Number of bits per pixel
   color_depth = int.from_bytes(file.read(2), "little")
   print(f"{color_depth=}")
-  offset = 0x1E
-  # file.seek(0x1E)   # Compression type
+  file.seek(0x1E)   # Compression type
   compression = int.from_bytes(file.read(2), "little")
   print(f"{compression=}")
-  offset = 0x20
-  file.read(14) #  file.seek(0x2E)  # Number of colors in the color palette
+  file.seek(0x2E)  # Number of colors in the color palette
   colors = int.from_bytes(file.read(4), "little")
   print(f"{colors=}")
-  offset = 0x32
   bitfield_masks = None
   if compression == 3 and bmp_header_length >= 56:
     bitfield_masks = {}
     endianess = "little" if color_depth == 16 else "big"
-    file.read(18)  # file.seek(0x36)
+    file.seek(0x36)
     bitfield_masks["red"] = int.from_bytes(file.read(4), endianess)
-    offset = 0x3A
-    # file.seek(0x3A)       # redundant
+    file.seek(0x3A)
     bitfield_masks["green"] = int.from_bytes(file.read(4), endianess)
-    offset = 0x3E
-    # file.seek(0x3E)       # redundant
+    file.seek(0x3E)
     bitfield_masks["blue"] = int.from_bytes(file.read(4), endianess)
-    offset = 0x42
 
   if compression > 3:
     raise NotImplementedError("bitmask compression unsupported")
@@ -83,7 +69,6 @@ def load(file, bitmap_obj):
     from . import truecolor
     return truecolor.load(
       file,
-      offset,
       _width,
       _height,
       data_start,
@@ -97,7 +82,6 @@ def load(file, bitmap_obj):
   from . import indexed
   return indexed.load(
     file,
-    offset,
     _width,
     _height,
     data_start,

@@ -15,26 +15,8 @@ Load pixel values (indices or colors) into a bitmap and colors into a palette.
 * Author(s): Scott Shawcroft, Matt Land, Bernhard Bablok
 """
 
-# --- a minimalistic ResponseReader   ----------------------------------------
-
-class ResponseReader:
-  """ A minimalistic Response reader """
-  def __init__(self, response):
-    self._response = response
-  def __enter__(self):
-    return self
-  def __exit__(self, exception_type, exception_value, traceback):
-    try:
-      self._response.close()
-    except:
-      pass
-    return False
-  def read(self, n):
-    buf = bytearray(n)
-    self._response._readinto(buf)
-    return bytes(buf)
-  def readinto(self, buf):
-    return self._response._readinto(buf)
+# import ResponseReader into the namespace of this module
+from .responsereader import ResponseReader
 
 # --- load multiplexer   -----------------------------------------------------
 
@@ -49,9 +31,6 @@ def load(file_or_filename,
   """
   if isinstance(file_or_filename, str):
     open_file = open(file_or_filename, "rb")
-  elif hasattr(file_or_filename, "socket"):
-    # assume adafruit_requests.Response
-    open_file = ResponseReader(file_or_filename)
   else:
     open_file = file_or_filename
 
