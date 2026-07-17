@@ -14,7 +14,7 @@ Main changes
 Status
 ------
 
-  - implemented currently only for indexed BMPs
+  - implemented currently only for BMPs
 
 The changes to the original library might or might not be merged into
 the upstream project. This probably depends on Adafruit policy.
