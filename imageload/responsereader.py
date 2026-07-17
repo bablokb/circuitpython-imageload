@@ -19,7 +19,7 @@ class ResponseReader:
 
   def __exit__(self, exception_type, exception_value, traceback):
     try:
-      self._response.close()
+      self.close()
     except:
       pass
     return False
@@ -27,6 +27,7 @@ class ResponseReader:
   def close(self):
     """ close the reader and the underlying Response """
     self._response.close()
+    print(f"total bytes read: {self._index}")
 
   def read(self, n):
     buf = bytearray(n)
@@ -54,7 +55,7 @@ class ResponseReader:
       # relative seek
       if offset > 0:
         self.read(offset)
-      elif n < 0:
+      elif offset < 0:
         raise NotImplementedError("only forward seek possible")
     elif whence == 2:
       # relative from end
