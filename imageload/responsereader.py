@@ -31,13 +31,19 @@ class ResponseReader:
 
   def read(self, n):
     buf = bytearray(n)
-    count = self._response._readinto(buf)
-    self._index += count 
-    return bytes(buf)
+    count = self.readinto(buf)
+    return bytes(buf[:count])
 
   def readinto(self, buf):
-    self._index += len(buf)
-    return self._response._readinto(buf)
+    mv = memoryview(buf)
+    count = 0
+    while count < len(buf):
+      c = self._response._readinto(mv[count:])
+      if not c:            # EOF / connection closed
+        break
+      count += c
+    self._index += count
+    return count
 
   def tell(self):
     """ return current position """
