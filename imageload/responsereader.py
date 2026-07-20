@@ -27,7 +27,7 @@ class ResponseReader:
   def close(self):
     """ close the reader and the underlying Response """
     self._response.close()
-    print(f"total bytes read: {self._index}")
+    #print(f"total bytes read: {self._index}")
 
   def read(self, n):
     buf = bytearray(n)

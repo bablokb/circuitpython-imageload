@@ -29,10 +29,10 @@ def load(file, bitmap_obj):
 
   file.seek(10)
   data_start = int.from_bytes(file.read(4), "little")
-  print(f"{data_start=}")
+  #print(f"{data_start=}")
   file.seek(14)
   bmp_header_length = int.from_bytes(file.read(4), "little")
-  print(f"{bmp_header_length=}")
+  #print(f"{bmp_header_length=}")
   file.seek(0x12)  # Width of the bitmap in pixels
   _width = int.from_bytes(file.read(4), "little")
   try:
@@ -41,16 +41,16 @@ def load(file, bitmap_obj):
     raise NotImplementedError(
       "Negative height BMP files are not supported on builds without longint"
       ) from error
-  print(f"dimensions={_width}x{_height}")
+  #print(f"dimensions={_width}x{_height}")
   file.seek(0x1C)  # Number of bits per pixel
   color_depth = int.from_bytes(file.read(2), "little")
-  print(f"{color_depth=}")
+  #print(f"{color_depth=}")
   file.seek(0x1E)   # Compression type
   compression = int.from_bytes(file.read(2), "little")
-  print(f"{compression=}")
+  #print(f"{compression=}")
   file.seek(0x2E)  # Number of colors in the color palette
   colors = int.from_bytes(file.read(4), "little")
-  print(f"{colors=}")
+  #print(f"{colors=}")
   bitfield_masks = None
   if compression == 3 and bmp_header_length >= 56:
     bitfield_masks = {}

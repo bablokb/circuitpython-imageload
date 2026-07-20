@@ -36,7 +36,7 @@ def load(file_or_filename,
 
   with open_file as file:
     header = file.read(3)
-    print(f"{header=}")
+    #print(f"{header=}")
     if header.startswith(b"BM"):
       from . import bmp
       return bmp.load(file, bitmap_obj)

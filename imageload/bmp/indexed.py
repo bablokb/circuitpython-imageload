@@ -60,7 +60,7 @@ def load(
     palette_obj[value] = bytes(
       b"".join([c_bytes[2:3], c_bytes[1:2], c_bytes[0:1], c_bytes[3:1]])
       )
-    print(f"palette_obj[{value}]={palette_obj[value]:#08x}")
+    #print(f"palette_obj[{value}]={palette_obj[value]:#08x}")
 
   minimum_color_depth = 1
   while colors > 2**minimum_color_depth:
