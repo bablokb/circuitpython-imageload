@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: MIT
 
 """
-`adafruit_imageload.tilegrid_inflator`
+`imageload.tilegrid_inflator`
 ====================================================
 
 Use a 3x3 spritesheet to inflate a larger grid of tiles, duplicating the center rows and
@@ -15,8 +15,7 @@ columns as many times as needed to reach a target size.
 """
 
 import displayio
-
-import adafruit_imageload
+import imageload
 
 try:
     from typing import List, Optional, Tuple, Union
@@ -57,7 +56,7 @@ def inflate_tilegrid(  # noqa: PLR0913, PLR0912, Too many arguments in function 
     image: Bitmap
     palette: Palette
     if bmp_path is not None:
-        image, palette = adafruit_imageload.load(bmp_path)  # type: ignore[assignment]
+        image, palette = imageload.load(bmp_path)  # type: ignore[assignment]
     else:
         image = bmp_obj  # type: ignore[assignment]
         palette = bmp_palette  # type: ignore[assignment]

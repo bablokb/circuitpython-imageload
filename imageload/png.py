@@ -5,7 +5,7 @@
 # SPDX-License-Identifier: MIT
 
 """
-`adafruit_imageload.png`
+`imageload.png`
 ====================================================
 
 Load pixel values (indices or colors) into a bitmap and colors into a palette

@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: MIT
 
 """
-`adafruit_imageload.jpg`
+`imageload.jpg`
 ====================================================
 
 Load a JPG into a bitmap by calling the jpegio class.

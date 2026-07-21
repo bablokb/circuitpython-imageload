@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: MIT
 """
-`adafruit_imageload.displayio_types`
+`imageload.displayio_types`
 ====================================================
 
 This is a utility file for type aliases.

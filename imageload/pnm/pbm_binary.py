@@ -6,7 +6,7 @@
 # SPDX-License-Identifier: MIT
 
 """
-`adafruit_imageload.pnm.pbm_binary`
+`imageload.pnm.pbm_binary`
 ====================================================
 
 Load pixel values (indices or colors) into a bitmap and for an ascii ppm,
