@@ -1,8 +1,13 @@
+# SPDX-FileCopyrightText: 2026 Bernhard Bablok
 # SPDX-FileCopyrightText: 2022 Radomir Dopieralski
 # SPDX-FileCopyrightText: 2023 Matt Land
 # SPDX-FileCopyrightText: 2024 Channing Ramos
 #
 # SPDX-License-Identifier: MIT
+
+# This is based on adafruit_imageload with modifications:
+#   - only import modules that are actually used
+#   - optionally (re) use a pre-allocated Bitmap-object
 
 """
 `imageload.png`
@@ -11,47 +16,26 @@
 Load pixel values (indices or colors) into a bitmap and colors into a palette
 from a PNG file.
 
-* Author(s): Radomir Dopieralski, Matt Land, Channing Ramos
+* Author(s): Bernhard Bablok, Radomir Dopieralski, Matt Land, Channing Ramos
 
 """
 
-try:
-    from io import BufferedReader
-    from typing import Optional, Tuple
-
-    from displayio import Bitmap, Palette
-
-    from .displayio_types import BitmapConstructor, PaletteConstructor
-except ImportError:
-    pass
-
+import displayio
 import struct
 import zlib
 
-__version__ = "0.0.0+auto.0"
-__repo__ = "https://github.com/adafruit/Adafruit_CircuitPython_ImageLoad.git"
-
-
-def load(  # noqa: PLR0912, PLR0915, Too many branches, Too many statements
-    file: BufferedReader, *, bitmap: BitmapConstructor, palette: Optional[PaletteConstructor] = None
-) -> Tuple[Bitmap, Optional[Palette]]:
+def load(file, bitmap_obj):
     """
     Loads a PNG image from the open ``file``.
     Only supports indexed color images.
 
     Returns tuple of bitmap object and palette object.
 
-    :param io.BufferedReader file: Open file handle or compatible (like `io.BytesIO`)
+    :param file: Open file handle or compatible (like `io.BytesIO`)
       with the data of a PNG file.
-    :param object bitmap: Type to store bitmap data. Must have API similar to
-      `displayio.Bitmap`.
-    :param object palette: Type to store the palette. Must have API similar to
-      `displayio.Palette`. Will be skipped if None.
+    :param bitmap_obj: used if not None, Must be of the correct size/type.
     """
-    header = file.read(8)
-    if header != b"\x89PNG\r\n\x1a\n":
-        raise ValueError("Not a PNG file")
-    del header
+    file.seek(8)
     data = bytearray()
     pal = None
     mode = None
@@ -76,15 +60,12 @@ def load(  # noqa: PLR0912, PLR0915, Too many branches, Too many statements
             assert compression == 0
             assert filters == 0
         elif chunk == b"PLTE":
-            if palette is None:
-                file.seek(size, 1)
-            else:
-                if mode != 3:
-                    raise NotImplementedError("Palette in non-indexed image")
-                pal_size = size // 3
-                pal = palette(pal_size)
-                for i in range(pal_size):
-                    pal[i] = file.read(3)
+            if mode != 3:
+                raise NotImplementedError("Palette in non-indexed image")
+            pal_size = size // 3
+            pal = displayio.Palette(pal_size)
+            for i in range(pal_size):
+                pal[i] = file.read(3)
         elif chunk == b"tRNS":
             if size > len(pal):
                 raise ValueError("More transparency entries than palette entries")
@@ -104,7 +85,10 @@ def load(  # noqa: PLR0912, PLR0915, Too many branches, Too many statements
     unit = (1, 0, 3, 1, 2, 0, 4)[mode]
     scanline = (width * depth * unit + 7) // 8
     if mode == 3:  # indexed
-        bmp = bitmap(width, height, 1 << depth)
+        if bitmap_obj:
+            bmp = bitmap_obj
+        else:
+            bmp = displayio.Bitmap(width, height, 1 << depth)
         pixels_per_byte = 8 // depth
         src = 0
         pixmask = (1 << depth) - 1
@@ -158,12 +142,14 @@ def load(  # noqa: PLR0912, PLR0915, Too many branches, Too many statements
             prev, line = line, prev
         return bmp, pal
     # RGB, RGBA or Grayscale
-    import displayio
 
     if depth != 8:
         raise ValueError("Must be 8bit depth.")
     pal = displayio.ColorConverter(input_colorspace=displayio.Colorspace.RGB888)
-    bmp = bitmap(width, height, 65536)
+    if bitmap_obj:
+        bmp = bitmap_obj
+    else:
+        bmp = displayio.Bitmap(width, height, 65536)
     prev = bytearray(scanline)
     line = bytearray(scanline)
     for y in range(height):
