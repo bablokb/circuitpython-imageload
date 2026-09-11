@@ -20,9 +20,9 @@ import sys
 import displayio
 
 try:
-    from bitmaptools import readinto as _bitmap_readinto
+  from bitmaptools import readinto as _bitmap_readinto
 except ImportError:
-    _bitmap_readinto = None
+  _bitmap_readinto = None
 
 from imageload import ResponseReader
 
@@ -49,6 +49,7 @@ def load(
   """
 
   # A ResponseReader is not an native object, so bitmaptools will fail
+  global _bitmap_readinto
   if isinstance(file,ResponseReader):
     _bitmap_readinto = None
 
